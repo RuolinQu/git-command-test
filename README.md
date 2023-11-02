@@ -1,63 +1,59 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { AgGridReact } from 'ag-grid-react';
+import React, { useState } from "react";
+import { DateTime } from "luxon";
 
-const CustomCellRenderer = forwardRef((props, ref) => {
-  const [value, setValue] = useState(props.value);
+const DatePicker = () => {
+  const [selectedDate, setSelectedDate] = useState(DateTime.local());
 
-  useEffect(() => {
-    setValue(props.value);
-  }, [props.value]);
-
-  useImperativeHandle(ref, () => ({
-    refresh: (params) => {
-      setValue(params.value);
-      return true;
-    }
-  }));
-
-  return <span>{value}</span>;
-});
-
-const MyGridComponent = () => {
-  const [rowData, setRowData] = useState([
-    { make: 'Toyota', model: 'Celica', price: 35000 },
-    { make: 'Ford', model: 'Mondeo', price: 32000 },
-    { make: 'Porsche', model: 'Boxter', price: 72000 }
-  ]);
-
-  const columnDefs = [
-    { headerName: 'Make', field: 'make' },
-    { headerName: 'Model', field: 'model' },
-    {
-      headerName: 'Price',
-      field: 'price',
-      cellRenderer: 'customCellRenderer'
-    }
-  ];
-
-  const frameworkComponents = {
-    customCellRenderer: CustomCellRenderer
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
   };
 
-  const onButtonClick = () => {
-    rowData[0].price = 40000;
-    setRowData([...rowData]);
+  const handlePreviousMonth = () => {
+    handleDateChange(selectedDate.minus({ months: 1 }));
   };
+
+  const handleNextMonth = () => {
+    handleDateChange(selectedDate.plus({ months: 1 }));
+  };
+
+  const daysInMonth = selectedDate.daysInMonth;
+  const firstDayOfMonth = selectedDate.startOf("month");
+
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) =>
+    firstDayOfMonth.plus({ days: i })
+  );
 
   return (
-    <div
-      className="ag-theme-alpine"
-      style={{
-        height: '500px',
-        width: '600px'
-      }}
-    >
-      <button onClick={onButtonClick}>Update Data</button>
-      <AgGridReact
-        columnDefs={columnDefs}
-        rowData={rowData}
-        frameworkComponents={frameworkComponents}
-      ></AgGridReact>
+    <div>
+      <div>
+        <button onClick={handlePreviousMonth}>Previous Month</button>
+        <button onClick={handleNextMonth}>Next Month</button>
+      </div>
+      <div>
+        <h3>{selectedDate.toFormat("MMMM yyyy")}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Sun</th>
+              <th>Mon</th>
+              <th>Tue</th>
+              <th>Wed</th>
+              <th>Thu</th>
+              <th>Fri</th>
+              <th>Sat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {daysArray.map((day) => (
+              <tr key={day.toISODate()}>
+                <td>{day.toFormat("d")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
+
+export default DatePicker;
