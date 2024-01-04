@@ -1,59 +1,109 @@
-import React, { useState } from "react";
-import { DateTime } from "luxon";
+import React from "react";
+import "./Calendar.css"; // You can define your CSS styles for the calendar here
 
-const DatePicker = () => {
-  const [selectedDate, setSelectedDate] = useState(DateTime.local());
+const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
+const Calendar = ({ currentDate }) => {
+  const renderDaysOfWeek = () => {
+    return daysOfWeek.map((day) => (
+      <div className="day-of-week" key={day}>
+        {day}
+      </div>
+    ));
   };
 
-  const handlePreviousMonth = () => {
-    handleDateChange(selectedDate.minus({ months: 1 }));
+  const renderCalendarDays = () => {
+    const firstDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    const lastDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
+    const daysInMonth = lastDayOfMonth.getDate();
+
+    const blanksBeforeFirstDay = firstDayOfMonth.getDay(); // Get the index of the first day (0-6)
+
+    let days = [];
+
+    for (let i = 0; i < blanksBeforeFirstDay; i++) {
+      days.push(
+        <div className="empty-day" key={`empty-${i}`}>
+          {/* Render empty placeholders for days before the first day of the month */}
+        </div>
+      );
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(
+        <div className="calendar-day" key={day}>
+          {day}
+        </div>
+      );
+    }
+
+    return days;
   };
 
-  const handleNextMonth = () => {
-    handleDateChange(selectedDate.plus({ months: 1 }));
-  };
-
-  const daysInMonth = selectedDate.daysInMonth;
-  const firstDayOfMonth = selectedDate.startOf("month");
-
-  const daysArray = Array.from({ length: daysInMonth }, (_, i) =>
-    firstDayOfMonth.plus({ days: i })
-  );
-
+  console.log(currentDate);
   return (
-    <div>
-      <div>
-        <button onClick={handlePreviousMonth}>Previous Month</button>
-        <button onClick={handleNextMonth}>Next Month</button>
+    <div className="calendar-container">
+      <div className="month-header">
+        {currentDate.toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        })}
       </div>
-      <div>
-        <h3>{selectedDate.toFormat("MMMM yyyy")}</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Sun</th>
-              <th>Mon</th>
-              <th>Tue</th>
-              <th>Wed</th>
-              <th>Thu</th>
-              <th>Fri</th>
-              <th>Sat</th>
-            </tr>
-          </thead>
-          <tbody>
-            {daysArray.map((day) => (
-              <tr key={day.toISODate()}>
-                <td>{day.toFormat("d")}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <div className="days-of-week">{renderDaysOfWeek()}</div>
+      <div className="calendar-days">{renderCalendarDays()}</div>
     </div>
   );
 };
 
-export default DatePicker;
+export default Calendar;
+
+
+.calendar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 300px; /* Adjust width as needed */
+    font-family: Arial, sans-serif;
+  }
+  
+  .month-header {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+  
+  .days-of-week {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .day-of-week {
+    width: calc(100% / 7); /* Equal width for each day of the week */
+    text-align: center;
+  }
+  
+  .calendar-days {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  .calendar-day {
+    width: calc(100% / 7); /* Equal width for each day cell */
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  
+  .empty-day {
+    width: calc(100% / 7); /* Equal width for empty day cell */
+  }
+  
