@@ -1,15 +1,11 @@
 import React from "react";
-import "./Calendar.css"; // You can define your CSS styles for the calendar here
+import "./TableCalendar.css"; // You can define your CSS styles for the calendar here
 
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const Calendar = ({ currentDate }) => {
   const renderDaysOfWeek = () => {
-    return daysOfWeek.map((day) => (
-      <div className="day-of-week" key={day}>
-        {day}
-      </div>
-    ));
+    return daysOfWeek.map((day) => <th key={day}>{day}</th>);
   };
 
   const renderCalendarDays = () => {
@@ -24,41 +20,39 @@ const Calendar = ({ currentDate }) => {
       0
     );
     const daysInMonth = lastDayOfMonth.getDate();
-
     const blanksBeforeFirstDay = firstDayOfMonth.getDay(); // Get the index of the first day (0-6)
 
     let days = [];
+    let dayCounter = 1;
 
-    for (let i = 0; i < blanksBeforeFirstDay; i++) {
-      days.push(
-        <div className="empty-day" key={`empty-${i}`}>
-          {/* Render empty placeholders for days before the first day of the month */}
-        </div>
-      );
-    }
+    for (let i = 0; i < 6; i++) {
+      let weekDays = [];
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(
-        <div className="calendar-day" key={day}>
-          {day}
-        </div>
-      );
+      for (let j = 0; j < 7; j++) {
+        if (i === 0 && j < blanksBeforeFirstDay) {
+          // Render empty placeholders for days before the first day of the month
+          weekDays.push(<td key={`empty-${j}`}></td>);
+        } else if (dayCounter <= daysInMonth) {
+          weekDays.push(<td key={dayCounter}>{dayCounter}</td>);
+          dayCounter++;
+        }
+      }
+
+      days.push(<tr key={i}>{weekDays}</tr>);
+      if (dayCounter > daysInMonth) break;
     }
 
     return days;
   };
 
-  console.log(currentDate);
   return (
     <div className="calendar-container">
-      <div className="month-header">
-        {currentDate.toLocaleString("default", {
-          month: "long",
-          year: "numeric",
-        })}
-      </div>
-      <div className="days-of-week">{renderDaysOfWeek()}</div>
-      <div className="calendar-days">{renderCalendarDays()}</div>
+      <table className="calendar-table">
+        <thead>
+          <tr>{renderDaysOfWeek()}</tr>
+        </thead>
+        <tbody>{renderCalendarDays()}</tbody>
+      </table>
     </div>
   );
 };
@@ -67,43 +61,44 @@ export default Calendar;
 
 
 .calendar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     width: 300px; /* Adjust width as needed */
     font-family: Arial, sans-serif;
   }
   
-  .month-header {
-    font-size: 1.2em;
-    margin-bottom: 10px;
-  }
-  
-  .days-of-week {
-    display: flex;
-    justify-content: space-around;
+  .calendar-table {
     width: 100%;
-    margin-bottom: 10px;
+    border-collapse: collapse;
   }
   
-  .day-of-week {
-    width: calc(100% / 7); /* Equal width for each day of the week */
+  .calendar-table th,
+  .calendar-table td {
+    padding: 8px;
     text-align: center;
+    border: 1px solid #ccc;
   }
   
-  .calendar-days {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
+  .calendar-table th {
+    background-color: #f2f2f2;
   }
   
-  .calendar-day {
-    width: calc(100% / 7); /* Equal width for each day cell */
-    text-align: center;
-    margin-bottom: 5px;
+  .calendar-table td {
+    cursor: pointer;
   }
   
-  .empty-day {
-    width: calc(100% / 7); /* Equal width for empty day cell */
+  /* Add specific styles for days of the week (Mon to Sun) */
+  .calendar-table th:nth-child(1),
+  .calendar-table td:nth-child(1) {
+    /* Style for Monday */
   }
   
+  .calendar-table th:nth-child(2),
+  .calendar-table td:nth-child(2) {
+    /* Style for Tuesday */
+  }
+  
+  /* Continue styling for each day of the week (Wednesday to Sunday) */
+  /* .calendar-table th:nth-child(n),
+     .calendar-table td:nth-child(n) {
+       Style for respective days
+     }
+  */
