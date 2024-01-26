@@ -1,69 +1,40 @@
-// DateRangeController.js
-import React, { useState } from 'react';
+// DateCalendar.test.js
+import React from 'react';
+import { mount } from 'enzyme';
 import DateCalendar from './DateCalendar';
 
-const DateRangeController = () => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+describe('DateCalendar Component', () => {
+  const currentDate = new Date(2022, 0, 15); // January 15, 2022
 
-  const handleDateClick = (clickedDate) => {
-    if (!startDate) {
-      // If no start date selected, set clickedDate as start date
-      setStartDate(clickedDate);
-      setEndDate(null);
-    } else if (!endDate && clickedDate > startDate) {
-      // If start date selected and no end date, and clickedDate is after start date, set as end date
-      setEndDate(clickedDate);
-    } else {
-      // Reset selection if clicked on an invalid date
-      setStartDate(null);
-      setEndDate(null);
-    }
-  };
+  it('renders without crashing', () => {
+    const wrapper = mount(<DateCalendar currentDate={currentDate} onDateClick={() => {}} selectedDates={[]} />);
+    expect(wrapper.exists()).toBe(true);
+  });
 
-  return (
-    <div>
-      <h2>Date Range Controller</h2>
-      <div>
-        <strong>Selected Range: </strong>
-        {startDate && endDate ? `${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}` : 'None'}
-      </div>
-      <DateCalendar
-        currentDate={new Date()}
-        onDateClick={handleDateClick}
-        selectedDates={[startDate, endDate]}
-      />
-    </div>
-  );
-};
+  it('calls onDateClick when a date is clicked', () => {
+    const onDateClickMock = jest.fn();
+    const wrapper = mount(<DateCalendar currentDate={currentDate} onDateClick={onDateClickMock} selectedDates={[]} />);
 
-export default DateRangeController;
+    // Simulate a click on a date cell
+    wrapper.find('td').at(5).simulate('click'); // Click on the 6th day (index 5)
 
-// DatePickerController.js
-import React, { useState } from 'react';
-import DateCalendar from './DateCalendar';
+    // Check if onDateClick is called with the correct date
+    expect(onDateClickMock).toHaveBeenCalledWith(new Date(2022, 0, 6));
+  });
 
-const DatePickerController = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
+  it('applies selected style to clicked date cell', () => {
+    const selectedDates = [new Date(2022, 0, 6)];
+    const wrapper = mount(<DateCalendar currentDate={currentDate} onDateClick={() => {}} selectedDates={selectedDates} />);
 
-  const handleDateClick = (clickedDate) => {
-    setSelectedDate(clickedDate);
-  };
+    // Check if the clicked date cell has the 'selected' class
+    expect(wrapper.find('td.selected').exists()).toBe(true);
+  });
 
-  return (
-    <div>
-      <h2>Date Picker Controller</h2>
-      <div>
-        <strong>Selected Date: </strong>
-        {selectedDate ? selectedDate.toLocaleDateString() : 'None'}
-      </div>
-      <DateCalendar
-        currentDate={new Date()}
-        onDateClick={handleDateClick}
-        selectedDates={[selectedDate]}
-      />
-    </div>
-  );
-};
+  it('does not apply selected style to non-clicked date cells', () => {
+    const selectedDates = [new Date(2022, 0, 6)];
+    const wrapper = mount(<DateCalendar currentDate={currentDate} onDateClick={() => {}} selectedDates={selectedDates} />);
 
-export default DatePickerController;
+    // Check if other date cells do not have the 'selected' class
+    expect(wrapper.find('td:not(.selected)').exists()).toBe(true);
+  });
+});
